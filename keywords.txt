@@ -1,0 +1,40 @@
+Buffer	KEYWORD1
+getWidth	KEYWORD2
+getHeight	KEYWORD2
+ptr	KEYWORD2
+overwrite	KEYWORD2
+overlay	KEYWORD2
+invert	KEYWORD2
+clear	KEYWORD2
+fill	KEYWORD2
+scrollUp	KEYWORD2
+scrollDown	KEYWORD2
+scrollLeft	KEYWORD2
+scrollRight	KEYWORD2
+flipV	KEYWORD2
+flipH	KEYWORD2
+rotateR	KEYWORD2
+rotateL	KEYWORD2
+fillRect	KEYWORD2
+rect	KEYWORD2
+line	KEYWORD2
+lineAcross	KEYWORD2
+lineDown	KEYWORD2
+circle	KEYWORD2
+fillCircle	KEYWORD2
+tri	KEYWORD2
+quad	KEYWORD2
+fillQuad	KEYWORD2
+getPixel	KEYWORD2
+setPixel	KEYWORD2
+bitmap	KEYWORD2
+getBitmap	KEYWORD2
+OFF	LITERAL1	Constants
+CLEAR	LITERAL1	Constants
+ON	LITERAL1	Constants
+FILLED	LITERAL1	Constants
+XOR	LITERAL1	Constants
+INVERT	LITERAL1	Constants
+OR	LITERAL1	Constants
+AND	LITERAL1	Constants
+

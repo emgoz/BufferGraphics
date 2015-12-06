@@ -11,11 +11,6 @@ Example:
 #define HEIGHT  16
 
 uint8_t displaybuf[WIDTH * HEIGHT / 8];
-<<<<<<< HEAD
 
 Buffer buff(displaybuf,64,16);
 ```
-=======
-Buffer buff(displaybuf,64,16);
-```
->>>>>>> origin/master

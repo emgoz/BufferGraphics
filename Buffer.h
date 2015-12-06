@@ -102,6 +102,7 @@ public:
   void bitmap(int x, int y, uint16_t a, uint16_t b, byte* pic, byte mode);  //Draws a*b bitmap at top left x,y; Modes available OR=FILLED=ON / XOR=INVERT / OFF=CLEAR (deletes background)
   void bitmap(int x, int y, uint16_t a, uint16_t b, const byte* pic, byte mode);
   void bitmap(int x, int y, Buffer pic_buffer, byte mode);  //Same as first, but takes a buffer as a bitmap
+  void writeByte(int x, int y, uint8_t data, uint8_t mode); //writes a single line of 8 bits; Modes available OR=FILLED=ON / XOR=INVERT
 
   byte* getBitmap(int x, int y, uint16_t a, uint16_t b, byte* buff); //Takes a screenshoot of the given area and stores it in another buffer. "Bitmap backwards"
   byte* getBitmap(int x, int y, Buffer buff2); //Same as above, but screenshot is as large as the buffer given.

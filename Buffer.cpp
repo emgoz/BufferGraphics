@@ -25,7 +25,7 @@
 //-------------------------------------------------------------------------------------------------
 // Constructor
 //-------------------------------------------------------------------------------------------------
-Buffer::Buffer(byte * RAM_area, uint16_t pixHor, uint16_t pixVer)
+Buffer::Buffer(uint8_t * RAM_area, int16_t pixHor, int16_t pixVer)
 {
     pixHor = (pixHor >> 3) * 8;
     if (pixHor > 256) pixHor = 256;
@@ -40,14 +40,14 @@ Buffer::Buffer(byte * RAM_area, uint16_t pixHor, uint16_t pixVer)
 //-------------------------------------------------------------------------------------------------
 // Pointer getter
 //-------------------------------------------------------------------------------------------------
-byte* Buffer::ptr()
+uint8_t* Buffer::ptr()
 {
     return array;
 }
 //-------------------------------------------------------------------------------------------------
 // Pointer setter
 //-------------------------------------------------------------------------------------------------
-byte* Buffer::ptr(byte* new_pointer)
+uint8_t* Buffer::ptr(uint8_t* new_pointer)
 {
     array = new_pointer;
     return array;
@@ -55,18 +55,18 @@ byte* Buffer::ptr(byte* new_pointer)
 //-------------------------------------------------------------------------------------------------
 // Get size
 //-------------------------------------------------------------------------------------------------
-uint16_t  Buffer::getWidth()
+int16_t  Buffer::getWidth()
 {
     return width;
 }
-uint16_t  Buffer::getHeight()
+int16_t  Buffer::getHeight()
 {
     return height;
 }
 //-------------------------------------------------------------------------------------------------
 // clear
 //-------------------------------------------------------------------------------------------------
-byte * Buffer::clear()
+uint8_t * Buffer::clear()
 {
     for(uint16_t  i=0; i < size; i++) array[i] = 0;
     return array;
@@ -74,7 +74,7 @@ byte * Buffer::clear()
 //-------------------------------------------------------------------------------------------------
 // fill
 //-------------------------------------------------------------------------------------------------
-byte * Buffer::fill(byte n)
+uint8_t * Buffer::fill(uint8_t n)
 {
     for(uint16_t  i=0; i < size; i++) array[i] = n;
     return array;
@@ -82,7 +82,7 @@ byte * Buffer::fill(byte n)
 //-------------------------------------------------------------------------------------------------
 // Invert
 //-------------------------------------------------------------------------------------------------
-byte * Buffer::invert()
+uint8_t * Buffer::invert()
 {
     for(uint16_t  i=0; i < size; i++) array[i] ^= 0xFF;
     return array;
@@ -90,7 +90,7 @@ byte * Buffer::invert()
 //-------------------------------------------------------------------------------------------------
 // Set Pixel
 //-------------------------------------------------------------------------------------------------
-void Buffer::setPixel(int x, int y, byte mode)
+void Buffer::setPixel(int x, int y, uint8_t mode)
 {
     if (y >= height || x >= width || x < 0 || y < 0)
         return;
@@ -131,10 +131,10 @@ void Buffer::scrollUp(int x, int y, int a, int b)
     }
     if (y >= height || x >= width || a <= 0 || b <= 1) return;
     uint16_t bottom;
-    byte left = x& 7;
+    uint8_t left = x& 7;
     if (left+a <= 8)  //only one byte?
     {
-        byte m = 0xFF << (8-a);
+        uint8_t m = 0xFF << (8-a);
         m >>= left;
         bottom = (y+b-1)*columns;
         for (uint16_t l = y*columns+x/8; l < bottom; l+=columns)
@@ -142,11 +142,11 @@ void Buffer::scrollUp(int x, int y, int a, int b)
     }
     else
     {
-        byte right = (x+a)& 7;
+        uint8_t right = (x+a)& 7;
         uint16_t start = y*columns+(x+7)/8;  //included
         uint16_t end =   y*columns+(x+a)/8;  //not included
-        byte l_m = 0xFF >> left;
-        byte r_m = 0xFF << 8-right;
+        uint8_t l_m = 0xFF >> left;
+        uint8_t r_m = 0xFF << 8-right;
         bottom = (b-1)*columns;
         for (uint16_t l = 0; l < bottom; l+=columns)
         {
@@ -173,10 +173,10 @@ void Buffer::scrollDown(int x, int y, int a, int b)
         y = 0;
     }
     if (y >= height || x >= width || a <= 0 || b <= 1) return;
-    byte left = x& 7;
+    uint8_t left = x& 7;
     if (left+a <= 8)  //only one byte?
     {
-        byte m = 0xFF << (8-a);
+        uint8_t m = 0xFF << (8-a);
         m >>= left;
         uint16_t top = y*columns+x/8;
         for (uint16_t l = (y+b-1)*columns; l > top; l-=columns)
@@ -184,11 +184,11 @@ void Buffer::scrollDown(int x, int y, int a, int b)
     }
     else
     {
-        byte right = (x+a)& 7;
+        uint8_t right = (x+a)& 7;
         uint16_t start = y*columns+(x+7)/8;  //included
         uint16_t end =   y*columns+(x+a)/8;  //not included
-        byte l_m = 0xFF >> left;
-        byte r_m = 0xFF << 8-right;
+        uint8_t l_m = 0xFF >> left;
+        uint8_t r_m = 0xFF << 8-right;
         for (uint16_t l = (b-1)*columns; l > 0; l-=columns)
         {
             if (left) array[l+start-1] = (array[l+start-1] & (~l_m)) | (array[l+start-columns-1] & l_m);
@@ -214,11 +214,11 @@ void Buffer::scrollRight(int x, int y, int a, int b)
         y = 0;
     }
     if (y >= height || x >= width || a <= 1 || b <= 0) return;
-    byte left = x& 7;
+    uint8_t left = x& 7;
     uint16_t bottom = (y+b)*columns;
     if (left+a <= 8)  //only one byte?
     {
-        byte m = 0xFF << (8-a);
+        uint8_t m = 0xFF << (8-a);
         m >>= left;
         for (uint16_t l = x/8+y*columns; l < bottom; l+=columns)
             array[l] = (array[l] & ~m) | (((array[l] & m) >> 1) & m);
@@ -228,21 +228,21 @@ void Buffer::scrollRight(int x, int y, int a, int b)
     {
         uint16_t start =   x/8;  //included
         uint16_t end = (x+a)/8;  //included
-        byte l_m = 0xFF >> left;
-        byte r_m = 0xFF << 8-((x+a)& 7);
+        uint8_t l_m = 0xFF >> left;
+        uint8_t r_m = 0xFF << 8-((x+a)& 7);
         if (!r_m)
         {
             r_m = 0xFF;
             end--;
         }
-        byte c,d;
+        uint8_t c,d;
         for (uint16_t l = y*columns; l < bottom; l+=columns)
         {
             c = array[l+start] << 7;
             array[l+start] = (array[l+start] & ~l_m) | (((array[l+start] & l_m) >> 1) & l_m);
             if (end-start>1)
             {
-                for (byte p = start+1; p < end; p++)
+                for (uint8_t p = start+1; p < end; p++)
                 {
                     d = array[p + l] << 7;
                     array[p + l] = c | (array[p+l] >> 1);
@@ -272,12 +272,12 @@ void Buffer::scrollLeft(int x, int y, int a, int b)
         y = 0;
     }
     if (y >= height || x >= width || a <= 1 || b <= 0) return;
-    byte left = x& 7;
+    uint8_t left = x& 7;
     uint16_t bottom = (y+b)*columns;
 
-    if (left+a <= 8)  //only one byte?
+    if (left+a <= 8)  //only one uint8_t?
     {
-        byte m = 0xFF << (8-a);
+        uint8_t m = 0xFF << (8-a);
         m >>= left;
         for (uint16_t l = x/8+y*columns; l < bottom; l+=columns)
             array[l] = (array[l] & ~m) | (((array[l] & m) << 1) & m);
@@ -286,21 +286,21 @@ void Buffer::scrollLeft(int x, int y, int a, int b)
     {
         uint16_t start =   x/8;  //included
         uint16_t end = (x+a)/8;  //included
-        byte l_m = 0xFF >> left;
-        byte r_m = 0xFF << 8-((x+a)& 7);
+        uint8_t l_m = 0xFF >> left;
+        uint8_t r_m = 0xFF << 8-((x+a)& 7);
         if (!r_m)
         {
             r_m = 0xFF;
             end--;
         }
-        byte c,d;
+        uint8_t c,d;
         for (uint16_t l = y*columns; l < bottom; l+=columns)
         {
             c = array[l+end] >> 7;
             array[l+end] = (array[l+end] & ~r_m) | (((array[l+end] & r_m) << 1) & r_m);
             if (end-start>1)
             {
-                for (byte p = end-1; p > start ; p--)
+                for (uint8_t p = end-1; p > start ; p--)
                 {
                     d = array[p + l] >> 7;
                     array[p + l] = c | (array[p+l] << 1);
@@ -314,7 +314,7 @@ void Buffer::scrollLeft(int x, int y, int a, int b)
     }
 
 }
-byte * Buffer::scrollUp(int n)
+uint8_t * Buffer::scrollUp(int n)
 {
     if (n < 0)
         return  scrollDown(-n);
@@ -324,7 +324,7 @@ byte * Buffer::scrollUp(int n)
     return array;
 
 }
-byte * Buffer::scrollDown(int n)
+uint8_t * Buffer::scrollDown(int n)
 {
     if (n < 0)
         return  scrollUp(-n);
@@ -333,7 +333,7 @@ byte * Buffer::scrollDown(int n)
     memmove(array+n*columns,array,(height-n)*columns);
     return array;
 }
-byte * Buffer::scrollRight(int n)
+uint8_t * Buffer::scrollRight(int n)
 {
     if (n < 0)
         return  scrollLeft(-n);
@@ -346,11 +346,11 @@ byte * Buffer::scrollRight(int n)
     }
     else
     {
-        byte c,d;
+        uint8_t c,d;
         for (uint16_t l = 0; l < size; l+= columns)
         {
             c = 0;
-            for (byte p = 0; p < columns; p++)
+            for (uint8_t p = 0; p < columns; p++)
             {
                 d = array[p + l] << (8-n);
                 array[p + l] = c | (array[p+l] >> n);
@@ -360,7 +360,7 @@ byte * Buffer::scrollRight(int n)
     }
     return array;
 }
-byte * Buffer::scrollLeft(int n)
+uint8_t * Buffer::scrollLeft(int n)
 {
     if (n < 0)
         return  scrollRight(-n);
@@ -373,11 +373,11 @@ byte * Buffer::scrollLeft(int n)
     }
     else
     {
-        byte c,d;
+        uint8_t c,d;
         for (uint16_t l = 0; l < size; l+= columns)
         {
             c = 0;
-            for (byte p = columns; p;)
+            for (uint8_t p = columns; p;)
             {
                 d = array[--p + l] >> (8-n);
                 array[p + l] = c | (array[p+l] << n);
@@ -391,7 +391,7 @@ byte * Buffer::scrollLeft(int n)
 //-------------------------------------------------------------------------------------------------
 // Overlay And / Or / Xor
 //-------------------------------------------------------------------------------------------------
-byte * Buffer::overlay(byte* other_buffer, byte mode)
+uint8_t * Buffer::overlay(uint8_t* other_buffer, uint8_t mode)
 {
     if (mode == AND)
     {
@@ -407,11 +407,11 @@ byte * Buffer::overlay(byte* other_buffer, byte mode)
     }
     return array;
 }
-byte * Buffer::overlay(Buffer other_buffer, byte mode)
+uint8_t * Buffer::overlay(Buffer other_buffer, uint8_t mode)
 {
     return overlay(other_buffer.ptr(),mode);
 }
-byte * Buffer::overlay(const byte* picture, byte mode)
+uint8_t * Buffer::overlay(const uint8_t* picture, uint8_t mode)
 {
     if (mode == AND)
     {
@@ -430,17 +430,17 @@ byte * Buffer::overlay(const byte* picture, byte mode)
 //-------------------------------------------------------------------------------------------------
 // Overwrite / Copy
 //-------------------------------------------------------------------------------------------------
-byte * Buffer::overwrite(Buffer other_buffer)
+uint8_t * Buffer::overwrite(Buffer other_buffer)
 {
     memcpy(array,other_buffer.ptr(),size);
     return array;
 }
-byte * Buffer::overwrite(byte* other_buffer)
+uint8_t * Buffer::overwrite(uint8_t* other_buffer)
 {
     memcpy(array,other_buffer,size);
     return array;
 }
-byte * Buffer::overwrite(const byte* picture)
+uint8_t * Buffer::overwrite(const uint8_t* picture)
 {
     memcpy(array,picture,size);
     return array;
@@ -466,7 +466,7 @@ void Buffer::flipV(int x, int y, int a, int b)
         d--;
     }
 }
-byte * Buffer::flipV()
+uint8_t * Buffer::flipV()
 {
     flipV(0,0,getWidth(),getHeight());
     return array;
@@ -490,7 +490,7 @@ void Buffer::flipH(int x, int y, int a, int b)
     }
 
 }
-byte * Buffer::flipH()
+uint8_t * Buffer::flipH()
 {
     flipH(0,0,getWidth(),getHeight());
     return array;
@@ -516,7 +516,7 @@ void Buffer::rotateR(int x, int y, int a)
         }
     }
 }
-byte * Buffer::rotateR()
+uint8_t * Buffer::rotateR()
 {
     rotateR(0,0,min(getHeight(),getWidth()));
     return array;
@@ -540,7 +540,7 @@ void Buffer::rotateL(int x, int y, int a)
     }
 
 }
-byte *  Buffer::rotateL()
+uint8_t *  Buffer::rotateL()
 {
     rotateL(0,0,min(getHeight(),getWidth()));
     return array;
@@ -548,16 +548,16 @@ byte *  Buffer::rotateL()
 //-------------------------------------------------------------------------------------------------
 // Bitmap getting ; Does NOT clip! ; May crash when given memory (*buff) is not large enough!
 //-------------------------------------------------------------------------------------------------
-byte * Buffer::getBitmap(int x, int y, uint16_t a, uint16_t b, byte* buff)
+uint8_t * Buffer::getBitmap(int x, int y, uint16_t a, uint16_t b, uint8_t* buff)
 {
     if (y+b > height || x+a > width || x < 0 || y < 0 || !a || !b) return 0; //not entirely on screen
     uint16_t start_line = y;  //included
     uint16_t start_col = x/8;  // included
     uint16_t end_line = y+b;     //excluded
     uint16_t end_col = (x+a+7)/8;  //excluded
-    byte offset_left = x& 7;  //bit offset
-    byte offset_right = (a+x)& 7;
-    byte mask = 0xFF << 8-(a& 7);
+    uint8_t offset_left = x& 7;  //bit offset
+    uint8_t offset_right = (a+x)& 7;
+    uint8_t mask = 0xFF << 8-(a& 7);
     if (!mask) mask = 0xFF;
     uint16_t i = 0;
     if (offset_left)   //Not aligned
@@ -582,9 +582,9 @@ byte * Buffer::getBitmap(int x, int y, uint16_t a, uint16_t b, byte* buff)
     }
     return buff;
 }
-byte * Buffer::getBitmap(int x, int y, Buffer buff2)
+uint8_t * Buffer::getBitmap(int x, int y, Buffer buff2)
 {
-    byte * buff = buff2.ptr();
+    uint8_t * buff = buff2.ptr();
     uint16_t a = buff2.getWidth();
     uint16_t b = buff2.getHeight();
     if (y+b > height || x+a > width || x < 0 || y < 0 || !a || !b) return 0; //not entirely on screen
@@ -592,7 +592,7 @@ byte * Buffer::getBitmap(int x, int y, Buffer buff2)
     uint16_t start_col = x/8;  // included
     uint16_t end_line = y+b;     //excluded
     uint16_t end_col = (x+a)/8;  //excluded
-    byte offset = x& 7;  //bit offset
+    uint8_t offset = x& 7;  //bit offset
     uint16_t i = 0;
     if (offset)   //Not aligned
     {
@@ -615,15 +615,15 @@ byte * Buffer::getBitmap(int x, int y, Buffer buff2)
 //-------------------------------------------------------------------------------------------------
 // Bitmap drawing
 //-------------------------------------------------------------------------------------------------
-void Buffer::bitmap(int x, int y, Buffer pic_buffer, byte mode)
+void Buffer::bitmap(int x, int y, Buffer pic_buffer, uint8_t mode)
 {
     bitmap(x,y,(uint16_t)pic_buffer.getWidth(),(uint16_t)pic_buffer.getHeight(),pic_buffer.ptr(),mode);
 }
-void Buffer::bitmap(int x, int y, uint16_t a, uint16_t b, const byte* pic, byte mode)
+void Buffer::bitmap(int x, int y, uint16_t a, uint16_t b, const uint8_t* pic, uint8_t mode)
 {
-    bitmap(x,y,a,b,(byte*)(pic),mode);
+    bitmap(x,y,a,b,(uint8_t*)(pic),mode);
 }
-void Buffer::bitmap(int x, int y, uint16_t a, uint16_t b, byte* pic, byte mode)
+void Buffer::bitmap(int x, int y, uint16_t a, uint16_t b, uint8_t* pic, uint8_t mode)
 {
     if (x >= width || y >= height || x+a <= 0 || y+b <= 0 || !a || !b) return; //outside screen
     uint16_t w_bmp = (a+7)/8;  //width in bytes
@@ -631,7 +631,7 @@ void Buffer::bitmap(int x, int y, uint16_t a, uint16_t b, byte* pic, byte mode)
     uint16_t start_col_bmp = 0;  // included
     uint16_t end_line_bmp = b;  //excluded
     uint16_t end_col_bmp = w_bmp;  //excluded
-    byte offset = x& 7;  //bit offset
+    uint8_t offset = x& 7;  //bit offset
     int dy = y;    //vertical offset to get line on buffer; bmp_line+dy -> buff_y
     int dx = x/8;  //...
     if (x + a > width)
@@ -650,7 +650,7 @@ void Buffer::bitmap(int x, int y, uint16_t a, uint16_t b, byte* pic, byte mode)
             dx--;     //correct rounding issue when x < 0
 
         }
-        byte c,d;  //shifted pixels
+        uint8_t c,d;  //shifted pixels
         if (mode == OFF)
         {
             for (uint16_t l = start_line_bmp; l < end_line_bmp; l++)
@@ -729,8 +729,9 @@ void Buffer::bitmap(int x, int y, uint16_t a, uint16_t b, byte* pic, byte mode)
 }
 void Buffer::writeByte(int x, int y, uint8_t data, uint8_t mode)
 {
-    if (x >= width || y >= height || x+8 <= 0 || y < 0) return; //outside screen
-    byte offset = x & 7;  //bit offset
+    if (x >= width ||y >= height || x+8<=0 || y < 0) return; //outside screen
+
+    uint8_t offset = x & 7;  //bit offset
     if (offset) //not aligned
     {
         writeByte(x-offset,y,data>>offset,mode);
@@ -748,7 +749,7 @@ void Buffer::writeByte(int x, int y, uint8_t data, uint8_t mode)
 //-------------------------------------------------------------------------------------------------
 // Quadrilateral
 //-------------------------------------------------------------------------------------------------
-void Buffer::quad(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, byte mode)
+void Buffer::quad(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3, uint8_t mode)
 {
     line(x0,y0,x1,y1,mode);
     line(x0,y0,x3,y3,mode);
@@ -765,7 +766,7 @@ void Buffer::quad(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3
 //-------------------------------------------------------------------------------------------------
 // Triangle
 //-------------------------------------------------------------------------------------------------
-void Buffer::tri(int x0, int y0, int x1, int y1, int x2, int y2, byte mode)
+void Buffer::tri(int x0, int y0, int x1, int y1, int x2, int y2, uint8_t mode)
 {
     line(x0,y0,x1,y1,mode);
     line(x0,y0,x2,y2,mode);
@@ -780,7 +781,7 @@ void Buffer::tri(int x0, int y0, int x1, int y1, int x2, int y2, byte mode)
 //-------------------------------------------------------------------------------------------------
 // Circle
 //-------------------------------------------------------------------------------------------------
-void Buffer::circle(int cx, int cy, int radius, byte mode)
+void Buffer::circle(int cx, int cy, int radius, uint8_t mode)
 {
     if (radius <= 0) return;
     int x = radius, y = 0, xchange, ychange, radiusError;
@@ -811,7 +812,7 @@ void Buffer::circle(int cx, int cy, int radius, byte mode)
         }
     }
 }
-void Buffer::fillCircle(int cx, int cy, int radius, byte mode)
+void Buffer::fillCircle(int cx, int cy, int radius, uint8_t mode)
 {
     if (radius <= 0) return;
     int x = radius, y = 0, xchange, ychange, radiusError;
@@ -840,7 +841,7 @@ void Buffer::fillCircle(int cx, int cy, int radius, byte mode)
 //-------------------------------------------------------------------------------------------------
 // Vertical line
 //-------------------------------------------------------------------------------------------------
-void Buffer::lineDown(int x,int y, int h, byte mode)
+void Buffer::lineDown(int x,int y, int h, uint8_t mode)
 {
     if (x < 0 || x >= width || y >= height) return;
     if (y < 0)
@@ -851,7 +852,7 @@ void Buffer::lineDown(int x,int y, int h, byte mode)
     if (y + h >= height)
         h = height-y;
     if (h <= 0) return;
-    byte k = 128 >> (x& 7);
+    uint8_t k = 128 >> (x& 7);
     h = x/8 + (y+h)*columns;
     if (mode == OFF)
     {
@@ -869,7 +870,7 @@ void Buffer::lineDown(int x,int y, int h, byte mode)
 //-------------------------------------------------------------------------------------------------
 // Horizontal line
 //-------------------------------------------------------------------------------------------------
-void Buffer::lineAcross(int x,int y, int w, byte mode)
+void Buffer::lineAcross(int x,int y, int w, uint8_t mode)
 {
     if (y < 0 || y >= height || x >= width) return;
     if (x < 0)
@@ -882,7 +883,7 @@ void Buffer::lineAcross(int x,int y, int w, byte mode)
     if (w <= 0) return;
     if ((x& 7)+w <= 8)
     {
-        byte m = 0xFF << (8-w);
+        uint8_t m = 0xFF << (8-w);
         m >>= (x& 7);
         if (mode == OFF) array[y*columns+x/8] &= ~m;
         else if (mode == XOR) array[y*columns+x/8] ^= m;
@@ -917,7 +918,7 @@ void Buffer::lineAcross(int x,int y, int w, byte mode)
 //-------------------------------------------------------------------------------------------------
 // Any line
 //-------------------------------------------------------------------------------------------------
-void Buffer::line(int x1,int y1, int x2, int y2, byte mode)
+void Buffer::line(int x1,int y1, int x2, int y2, uint8_t mode)
 {
     int CurrentX, CurrentY, Xinc, Yinc, Dx, Dy, TwoDx, TwoDy, AccumulatedError;
     Dx = x2-x1;
@@ -978,7 +979,7 @@ void Buffer::line(int x1,int y1, int x2, int y2, byte mode)
 //-------------------------------------------------------------------------------------------------
 // filled Rectangle
 //-------------------------------------------------------------------------------------------------
-void Buffer::fillRect(int x, int y, int a, int b, byte mode)
+void Buffer::fillRect(int x, int y, int a, int b, uint8_t mode)
 {
     if (x + a > width)
         a = width-x;
@@ -996,10 +997,10 @@ void Buffer::fillRect(int x, int y, int a, int b, byte mode)
     }
     if (y >= height || x >= width || a <= 0 || b <= 0) return;
     uint16_t bottom;
-    byte left = (x& 7);
+    uint8_t left = (x& 7);
     if (left+a <= 8)   //only one byte?
     {
-        byte m = 0xFF << (8-a);
+        uint8_t m = 0xFF << (8-a);
         m >>= left;
         bottom = (y+b)*columns;
         if (mode == OFF)
@@ -1020,11 +1021,11 @@ void Buffer::fillRect(int x, int y, int a, int b, byte mode)
     }
     else
     {
-        byte right = (x+a)& 7;
+        uint8_t right = (x+a)& 7;
         uint16_t start = y*columns+(x+7)/8;  //included
         uint16_t end =   y*columns+(x+a)/8;  //not included
-        byte l_m = 0xFF >> left;
-        byte r_m = 0xFF << 8-right;
+        uint8_t l_m = 0xFF >> left;
+        uint8_t r_m = 0xFF << 8-right;
         bottom = b*columns;
         if (mode == OFF)
         {
@@ -1058,7 +1059,7 @@ void Buffer::fillRect(int x, int y, int a, int b, byte mode)
 //-------------------------------------------------------------------------------------------------
 // Rectangular Frame
 //-------------------------------------------------------------------------------------------------
-void Buffer::rect(int x, int y, int a, int b, byte mode)
+void Buffer::rect(int x, int y, int a, int b, uint8_t mode)
 {
     lineAcross(x,y,a,mode);
     if (b > 1) lineAcross(x,y+b-1,a,mode);
